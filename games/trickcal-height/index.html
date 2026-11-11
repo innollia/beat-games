@@ -92,7 +92,7 @@ form label{grid-column:span 2;font-size:13px}
     <label>그림(선택): <input id="nImg" type="file" accept="image/*"></label>
     <button>+ 추가</button>
   </form>
-  <p class="note">키는 전부 <b>추정</b>이에요. 트릭컬은 공식 키를 공개하지 않아서, 게임 속 캐릭터 크기(발끝~머리·모자·귀 꼭대기)를 재고, 팬들이 계산한 4명(에르핀 95·버터 96·네르 98·마요 101cm, 아카라이브·나무위키)에 맞춰 cm로 바꿨어요. 무기·뿔·머리장식이 위로 솟은 캐릭터는 실제보다 크게 나와요. 겨우살이는 뷰어 원본 그림이 작게 나와서 1.2배로 키웠어요(100→120cm). 마요(멋짐)은 모자가 없어 작게 재져서 마요와 같은 키로 맞췄어요(97.9→101.6cm). 틀리면 숫자를 직접 고치세요(그림 크기도 따라 바뀌어요). 바꾼 내용은 이 브라우저에 저장돼요.</p>
+  <p class="note">키는 전부 <b>추정</b>이에요. 트릭컬은 공식 키를 공개하지 않아서, 게임 속 캐릭터 크기(발끝~머리·모자·귀 꼭대기)를 재고, 팬들이 계산한 4명(에르핀 95·버터 96·네르 98·마요 101cm, 아카라이브·나무위키)에 맞춰 cm로 바꿨어요. 무기·뿔·머리장식이 위로 솟은 캐릭터는 실제보다 크게 나와요. 겨우살이는 뷰어 원본 그림이 작게 나와서 1.2배로 키웠어요(100→120cm). 마요(멋짐)은 모자가 없어 작게 재져서 마요와 같은 키로 맞췄어요(97.9→101.6cm). 죠안은 옷자락 끝이 아니라 땅에 닿은 발을 기준으로 쟀어요(113.5→101.7cm). 틀리면 숫자를 직접 고치세요(그림 크기도 따라 바뀌어요). 바꾼 내용은 이 브라우저에 저장돼요.</p>
   <button id="reset" style="margin-top:6px">처음 상태로</button>
 </section>
 <section id="stage">
@@ -109,6 +109,7 @@ form label{grid-column:span 2;font-size:13px}
 <script>
 // 캐릭터 데이터: chars.json (게임 로비 스파인을 같은 배율로 그려 뽑은 그림 + 크기 측정값)
 // h: 추정 키(cm), img: 그림, ih: 그림 높이(px), u: 그림 1px이 몇 cm인지, fb: 그림 아래 끝이 발바닥보다 몇 px 아래인지
+// fs: 옷자락이 발보다 길게 늘어진 캐릭터를 발바닥 기준으로 맞추려고 더 내린 px(움직임 그림에도 똑같이)
 const DEFAULT_ON=["에르핀","버터","네르","마요","골디","니펠","겨우살이"];
 const FAN={"에르핀":95,"버터":96,"네르":98,"마요":101}; // 팬 계산 값
 const COLORS={"사도":"#ffb347","NPC":"#7ccf7a"};
@@ -276,7 +277,7 @@ function spSync(){
       const s=ppx*PPU,W=(I.X1-I.X0)*s,H=(I.Y1-I.Y0)*s,dpr=Math.min(2,devicePixelRatio||1);
       const cv=document.createElement("canvas");
       cv.width=Math.min(1024,Math.ceil(W*dpr));cv.height=Math.min(1024,Math.ceil(H*dpr));
-      cv.style.cssText=`width:${W}px;height:${H}px;margin:0 ${-I.m*s}px ${I.Y0*s}px`;
+      cv.style.cssText=`width:${W}px;height:${H}px;margin:0 ${-I.m*s}px ${I.Y0*s-(c.fs||0)*ppx}px`;
       img.replaceWith(cv);
       const it={I,cv,g:cv.getContext("2d")};
       SP.list.push(it);spDraw(it,0); // 바로 한 번 그려서 깜빡임 없게
