@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>트릭컬 사도 키 비교</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 system-ui,"Malgun Gothic",sans-serif;background:#fff6e8;color:#3a2a1a}
+header{padding:14px 16px;background:#ffcf6b;border-bottom:3px solid #e0a43a}
+h1{margin:0;font-size:22px}
+header p{margin:4px 0 0;font-size:13px}
+main{display:flex;flex-wrap:wrap;gap:16px;padding:16px}
+#side{flex:0 0 300px;background:#fff;border:2px solid #f0d3a0;border-radius:12px;padding:12px}
+#side h2{font-size:16px;margin:4px 0 8px}
+.row{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px dashed #f0d3a0}
+.row input[type=checkbox]{width:18px;height:18px}
+.row .nm{flex:1}
+.row .h{width:62px}
+.row button{border:0;background:none;cursor:pointer;font-size:15px}
+.tag{font-size:11px;color:#a07040}
+form{display:grid;grid-template-columns:1fr 70px;gap:6px;margin-top:10px}
+form input,form button,form select{font:inherit;padding:6px;border:2px solid #f0d3a0;border-radius:8px}
+form button{grid-column:span 2;background:#ffcf6b;cursor:pointer;font-weight:bold}
+form label{grid-column:span 2;font-size:13px}
+#stage{flex:1 1 500px;background:#fff;border:2px solid #f0d3a0;border-radius:12px;padding:12px;min-width:300px}
+#controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+#controls button{font:inherit;padding:4px 10px;border:2px solid #f0d3a0;border-radius:8px;background:#fff;cursor:pointer}
+#board{position:relative;height:520px;overflow-x:auto;overflow-y:hidden;border-bottom:3px solid #8a6a40}
+#grid{position:absolute;inset:0;pointer-events:none}
+.gl{position:absolute;left:0;right:0;border-top:1px dashed #e8dcc8;font-size:11px;color:#b09070;padding-left:2px}
+#people{position:absolute;left:44px;bottom:0;display:flex;align-items:flex-end;gap:18px;height:100%}
+.p{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:grab;user-select:none}
+.p .lab{font-size:13px;font-weight:bold;white-space:nowrap;text-align:center;line-height:1.2}
+.p .lab small{font-weight:normal;color:#a07040}
+.p .fig{position:relative;display:flex;align-items:flex-end;justify-content:center}
+.p img{height:100%;width:auto;display:block;object-fit:contain}
+.p.drag{opacity:.4}
+.note{font-size:12px;color:#8a6a40;margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+<h1>🍮 트릭컬 사도 키 비교</h1>
+<p>사도를 골라 나란히 세워 보세요. 키 숫자는 고칠 수 있고, 새 사도도 추가할 수 있어요. 그림 파일을 올리면 그 그림으로 세워 줘요.</p>
+</header>
+<main>
+<section id="side">
+  <h2>사도 목록</h2>
+  <div id="list"></div>
+  <form id="add">
+    <input id="nName" placeholder="이름 (예: 코미)" required>
+    <input id="nH" type="number" min="10" max="400" step="0.1" placeholder="cm" required>
+    <label>그림(선택): <input id="nImg" type="file" accept="image/*"></label>
+    <button>+ 추가</button>
+  </form>
+  <p class="note">'팬 추정' 표시: 트릭컬은 공식 키를 공개하지 않아서, 팬들이 게임 속 소품(총 길이 등)으로 계산한 값이에요(아카라이브·나무위키). 틀리면 숫자를 직접 고치세요. 바꾼 내용은 이 브라우저에 저장돼요.</p>
+  <button id="reset" style="margin-top:6px">처음 상태로</button>
+</section>
+<section id="stage">
+  <div id="controls">
+    <label>나도 같이 서기 <input id="me" type="number" min="0" max="250" placeholder="내 키 cm" style="width:90px"></label>
+    <button id="sortH">키순 정렬</button>
+    <span class="tag">캐릭터를 끌어서 순서를 바꿀 수 있어요</span>
+  </div>
+  <div id="board"><div id="grid"></div><div id="people"></div></div>
+  <div id="diff" class="note"></div>
+</section>
+</main>
+<script>
+const BASE=[
+ {name:"에르핀",height:95,race:"요정",personality:"순수",fan:1},
+ {name:"버터",height:96,race:"수인",personality:"활발",fan:1},
+ {name:"네르",height:98,race:"요정",personality:"광기",fan:1},
+ {name:"마요",height:101,race:"요정",personality:"광기",fan:1}
+];
+const COLORS={"순수":"#7ccf7a","냉정":"#6aa8ff","광기":"#e05a6a","활발":"#ffb347","우울":"#a98be0"};
+const KEY="tc-height-v1";
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S)S={chars:BASE.map(c=>({...c,on:true})),me:""};
+const imgs={}; // name -> objectURL (세션 동안만)
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+
+function color(c){return COLORS[c.personality]||"#c9a46b"}
+function silhouette(c,px){
+  const w=px*0.42, col=color(c);
+  return `<svg width="${w}" height="${px}" viewBox="0 0 42 100" preserveAspectRatio="none">
+   <ellipse cx="21" cy="17" rx="15" ry="16" fill="${col}"/>
+   <path d="M8 36 Q21 30 34 36 L38 74 L4 74 Z" fill="${col}" opacity=".85"/>
+   <rect x="10" y="73" width="8" height="27" rx="3" fill="${col}"/>
+   <rect x="24" y="73" width="8" height="27" rx="3" fill="${col}"/>
+   <circle cx="15" cy="17" r="2.2" fill="#3a2a1a"/><circle cx="27" cy="17" r="2.2" fill="#3a2a1a"/></svg>`;
+}
+
+function renderList(){
+  $("list").innerHTML=S.chars.map((c,i)=>`<div class="row">
+   <input type="checkbox" data-i="${i}" class="on" ${c.on?"checked":""}>
+   <span class="nm">${esc(c.name)} <span class="tag">${c.race?esc(c.race)+"·":""}${esc(c.personality||"")}${c.fan?" · 팬 추정":""}</span></span>
+   <input class="h" type="number" step="0.1" data-i="${i}" value="${c.height}">cm
+   <button data-i="${i}" class="del" title="지우기">✕</button></div>`).join("");
+}
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}
+
+function people(){
+  const arr=S.chars.map((c,i)=>({...c,i})).filter(c=>c.on);
+  const me=parseFloat(S.me);
+  if(me>0)arr.push({name:"나",height:me,me:true,i:-1});
+  return arr;
+}
+function renderBoard(){
+  const arr=people(), board=$("board"), H=board.clientHeight-40;
+  const max=Math.max(120,...arr.map(c=>c.height))*1.08;
+  const pxPerCm=H/max;
+  const step=max>250?50:max>120?20:10;
+  let g="";
+  for(let cm=0;cm<=max;cm+=step)g+=`<div class="gl" style="bottom:${cm*pxPerCm}px">${cm}</div>`;
+  $("grid").innerHTML=g;
+  $("people").innerHTML=arr.map(c=>{
+    const px=c.height*pxPerCm;
+    const fig=c.me?`<svg width="${px*0.3}" height="${px}" viewBox="0 0 30 100" preserveAspectRatio="none"><circle cx="15" cy="7" r="7" fill="#555"/><rect x="7" y="15" width="16" height="45" rx="5" fill="#777"/><rect x="8" y="58" width="6" height="42" fill="#555"/><rect x="16" y="58" width="6" height="42" fill="#555"/></svg>`
+      :imgs[c.name]?`<img src="${imgs[c.name]}" style="height:${px}px">`:silhouette(c,px);
+    return `<div class="p" draggable="${!c.me}" data-i="${c.i}"><div class="lab">${esc(c.name)}<br><small>${c.height}cm</small></div><div class="fig" style="height:${px}px">${fig}</div></div>`;
+  }).join("");
+  const sorted=[...arr].sort((a,b)=>b.height-a.height);
+  $("diff").textContent=sorted.length>1?`제일 큰 ${sorted[0].name}(${sorted[0].height}cm)와 제일 작은 ${sorted.at(-1).name}(${sorted.at(-1).height}cm)의 차이: ${(sorted[0].height-sorted.at(-1).height).toFixed(1)}cm`:"";
+}
+function render(){renderList();renderBoard();save()}
+
+$("list").addEventListener("change",e=>{
+  const i=+e.target.dataset.i;
+  if(e.target.classList.contains("on"))S.chars[i].on=e.target.checked;
+  if(e.target.classList.contains("h")){const v=parseFloat(e.target.value);if(v>0){S.chars[i].height=v;S.chars[i].fan=0}}
+  render();
+});
+$("list").addEventListener("click",e=>{
+  if(!e.target.classList.contains("del"))return;
+  S.chars.splice(+e.target.dataset.i,1);render();
+});
+$("add").addEventListener("submit",e=>{
+  e.preventDefault();
+  const name=$("nName").value.trim(),h=parseFloat($("nH").value);
+  if(!name||!(h>0))return;
+  const f=$("nImg").files[0];
+  if(f)imgs[name]=URL.createObjectURL(f);
+  const ex=S.chars.find(c=>c.name===name);
+  if(ex){ex.height=h;ex.on=true;ex.fan=0}else S.chars.push({name,height:h,race:"",personality:"",on:true});
+  e.target.reset();render();
+});
+$("me").value=S.me||"";
+$("me").addEventListener("input",e=>{S.me=e.target.value;renderBoard();save()});
+$("sortH").onclick=()=>{S.chars.sort((a,b)=>a.height-b.height);render()};
+$("reset").onclick=()=>{if(confirm("추가·수정한 내용을 지우고 처음 상태로 돌릴까요?")){S={chars:BASE.map(c=>({...c,on:true})),me:""};$("me").value="";render()}};
+
+let dragI=null;
+$("people").addEventListener("dragstart",e=>{const p=e.target.closest(".p");dragI=+p.dataset.i;p.classList.add("drag")});
+$("people").addEventListener("dragover",e=>e.preventDefault());
+$("people").addEventListener("drop",e=>{
+  e.preventDefault();const p=e.target.closest(".p");if(!p||dragI===null)return;
+  const to=+p.dataset.i;if(to<0||to===dragI)return;
+  const [m]=S.chars.splice(dragI,1);S.chars.splice(to,0,m);dragI=null;render();
+});
+$("people").addEventListener("dragend",()=>{dragI=null;renderBoard()});
+addEventListener("resize",renderBoard);
+render();
+</script>
+</body>
+</html>
