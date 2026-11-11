@@ -42,6 +42,7 @@ form label{grid-column:span 2;font-size:13px}
 <header>
 <h1>🍮 트릭컬 사도 키 비교</h1>
 <p>사도를 골라 나란히 세워 보세요. 키 숫자는 고칠 수 있고, 새 사도도 추가할 수 있어요. 그림 파일을 올리면 그 그림으로 세워 줘요.</p>
+<p style="font-size:11px;opacity:.7">사도 그림: 트릭컬 리바이브(EPIDGames) 사도 카드 그림, 나무위키에서 가져와 배경을 지웠어요. 팬 비교용이에요.</p>
 </header>
 <main>
 <section id="side">
@@ -79,6 +80,7 @@ let S;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S)S={chars:BASE.map(c=>({...c,on:true})),me:""};
 const imgs={}; // name -> objectURL (세션 동안만)
+const ART={"에르핀":"img/erpin.webp","버터":"img/butter.webp","네르":"img/ner.webp"}; // 나무위키 사도 카드 그림, 배경 지움
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const $=id=>document.getElementById(id);
 
@@ -119,7 +121,7 @@ function renderBoard(){
   $("people").innerHTML=arr.map(c=>{
     const px=c.height*pxPerCm;
     const fig=c.me?`<svg width="${px*0.3}" height="${px}" viewBox="0 0 30 100" preserveAspectRatio="none"><circle cx="15" cy="7" r="7" fill="#555"/><rect x="7" y="15" width="16" height="45" rx="5" fill="#777"/><rect x="8" y="58" width="6" height="42" fill="#555"/><rect x="16" y="58" width="6" height="42" fill="#555"/></svg>`
-      :imgs[c.name]?`<img src="${imgs[c.name]}" style="height:${px}px">`:silhouette(c,px);
+      :(imgs[c.name]||ART[c.name])?`<img src="${imgs[c.name]||ART[c.name]}" alt="${esc(c.name)}" style="height:${px}px">`:silhouette(c,px);
     return `<div class="p" draggable="${!c.me}" data-i="${c.i}"><div class="lab">${esc(c.name)}<br><small>${c.height}cm</small></div><div class="fig" style="height:${px}px">${fig}</div></div>`;
   }).join("");
   const sorted=[...arr].sort((a,b)=>b.height-a.height);
