@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>트릭컬 사도 키 비교</title>
+<title>트릭컬 캐릭터 키 비교</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font:15px/1.5 system-ui,"Malgun Gothic",sans-serif;background:#fff6e8;color:#3a2a1a}
@@ -10,8 +10,12 @@ header{padding:14px 16px;background:#ffcf6b;border-bottom:3px solid #e0a43a}
 h1{margin:0;font-size:22px}
 header p{margin:4px 0 0;font-size:13px}
 main{display:flex;flex-wrap:wrap;gap:16px;padding:16px}
-#side{flex:0 0 300px;background:#fff;border:2px solid #f0d3a0;border-radius:12px;padding:12px}
+#side{flex:0 0 320px;background:#fff;border:2px solid #f0d3a0;border-radius:12px;padding:12px}
 #side h2{font-size:16px;margin:4px 0 8px}
+#filt{display:flex;gap:6px;margin-bottom:6px}
+#filt input,#filt select{font:inherit;padding:5px;border:2px solid #f0d3a0;border-radius:8px;min-width:0}
+#filt input{flex:1}
+#list{max-height:430px;overflow-y:auto}
 .row{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px dashed #f0d3a0}
 .row input[type=checkbox]{width:18px;height:18px}
 .row .nm{flex:1}
@@ -25,7 +29,7 @@ form label{grid-column:span 2;font-size:13px}
 #stage{flex:1 1 500px;background:#fff;border:2px solid #f0d3a0;border-radius:12px;padding:12px;min-width:300px}
 #controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 #controls button{font:inherit;padding:4px 10px;border:2px solid #f0d3a0;border-radius:8px;background:#fff;cursor:pointer}
-#board{position:relative;height:520px;overflow-x:auto;overflow-y:hidden;border-bottom:3px solid #8a6a40}
+#board{position:relative;height:560px;overflow-x:auto;overflow-y:hidden;border-bottom:3px solid #8a6a40}
 #grid{position:absolute;inset:0;pointer-events:none}
 .gl{position:absolute;left:0;right:0;border-top:1px dashed #e8dcc8;font-size:11px;color:#b09070;padding-left:2px}
 #people{position:absolute;left:44px;bottom:0;display:flex;align-items:flex-end;gap:18px;height:100%}
@@ -40,21 +44,23 @@ form label{grid-column:span 2;font-size:13px}
 </head>
 <body>
 <header>
-<h1>🍮 트릭컬 사도 키 비교</h1>
-<p>사도를 골라 나란히 세워 보세요. 키 숫자는 고칠 수 있고, 새 사도도 추가할 수 있어요. 그림 파일을 올리면 그 그림으로 세워 줘요.</p>
-<p style="font-size:11px;opacity:.7">사도 그림: 트릭컬 리바이브(EPIDGames) 사도 카드 그림, 나무위키에서 가져와 배경을 지웠어요. 팬 비교용이에요.</p>
+<h1>🍮 트릭컬 캐릭터 키 비교</h1>
+<p>사도·NPC를 골라 나란히 세워 보세요. 그림은 게임 속 크기 그대로라서 서로 크기 비교가 돼요. 키 숫자는 고칠 수 있고, 새 캐릭터도 추가할 수 있어요.</p>
+<p style="font-size:11px;opacity:.7">캐릭터 그림: 트릭컬 리바이브(EPIDGames) 로비 캐릭터를 <a href="https://viewer.dclnslde.com/">트릭컬 스파인 뷰어</a>의 파일로 그려 뽑았어요. 팬 비교용이에요.</p>
 </header>
 <main>
 <section id="side">
-  <h2>사도 목록</h2>
+  <h2>캐릭터 목록 <span class="tag" id="cnt"></span></h2>
+  <div id="filt"><input id="q" placeholder="이름 검색"><select id="grp"><option value="">전체</option><option>사도</option><option>NPC</option><option value="on">세운 것만</option><option value="mine">내가 추가한 것</option></select></div>
   <div id="list"></div>
+  <button id="alloff" style="margin-top:6px">모두 내리기</button>
   <form id="add">
-    <input id="nName" placeholder="이름 (예: 코미)" required>
+    <input id="nName" placeholder="새 캐릭터 이름" required>
     <input id="nH" type="number" min="10" max="400" step="0.1" placeholder="cm" required>
     <label>그림(선택): <input id="nImg" type="file" accept="image/*"></label>
     <button>+ 추가</button>
   </form>
-  <p class="note">'팬 추정' 표시: 트릭컬은 공식 키를 공개하지 않아서, 팬들이 게임 속 소품(총 길이 등)으로 계산한 값이에요(아카라이브·나무위키). 틀리면 숫자를 직접 고치세요. 바꾼 내용은 이 브라우저에 저장돼요.</p>
+  <p class="note">키는 전부 <b>추정</b>이에요. 트릭컬은 공식 키를 공개하지 않아서, 게임 속 캐릭터 크기(발끝~머리·모자·귀 꼭대기)를 재고, 팬들이 계산한 4명(에르핀 95·버터 96·네르 98·마요 101cm, 아카라이브·나무위키)에 맞춰 cm로 바꿨어요. 무기·뿔·머리장식이 위로 솟은 캐릭터는 실제보다 크게 나와요. 틀리면 숫자를 직접 고치세요(그림 크기도 따라 바뀌어요). 바꾼 내용은 이 브라우저에 저장돼요.</p>
   <button id="reset" style="margin-top:6px">처음 상태로</button>
 </section>
 <section id="stage">
@@ -68,25 +74,25 @@ form label{grid-column:span 2;font-size:13px}
 </section>
 </main>
 <script>
-const BASE=[
- {name:"에르핀",height:95,race:"요정",personality:"순수",fan:1},
- {name:"버터",height:96,race:"수인",personality:"활발",fan:1},
- {name:"네르",height:98,race:"요정",personality:"광기",fan:1},
- {name:"마요",height:101,race:"요정",personality:"광기",fan:1}
-];
-const COLORS={"순수":"#7ccf7a","냉정":"#6aa8ff","광기":"#e05a6a","활발":"#ffb347","우울":"#a98be0"};
-const KEY="tc-height-v1";
-let S;
-try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
-if(!S)S={chars:BASE.map(c=>({...c,on:true})),me:""};
-const imgs={}; // name -> objectURL (세션 동안만)
-const ART={"에르핀":"img/erpin.webp","버터":"img/butter.webp","네르":"img/ner.webp"}; // 나무위키 사도 카드 그림, 배경 지움
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+// 캐릭터 데이터: chars.json (게임 로비 스파인을 같은 배율로 그려 뽑은 그림 + 크기 측정값)
+// h: 추정 키(cm), img: 그림, ih: 그림 높이(px), u: 그림 1px이 몇 cm인지, fb: 그림 아래 끝이 발바닥보다 몇 px 아래인지
+const DEFAULT_ON=["에르핀","버터","네르","마요","골디","니펠","겨우살이"];
+const FAN={"에르핀":95,"버터":96,"네르":98,"마요":101}; // 팬 계산 값
+const COLORS={"사도":"#ffb347","NPC":"#7ccf7a"};
+const KEY="tc-height-v2";
 const $=id=>document.getElementById(id);
+let DATA=[],S=null;
+const imgs={}; // 직접 올린 그림: key -> objectURL (세션 동안만)
 
-function color(c){return COLORS[c.personality]||"#c9a46b"}
-function silhouette(c,px){
-  const w=px*0.42, col=color(c);
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+function fresh(){return {on:DATA.filter(c=>DEFAULT_ON.includes(c.name)).map(c=>c.id),h:{},mine:[],me:""}}
+// 화면에 쓰는 캐릭터 = 기본 데이터(키 수정 반영) + 내가 추가한 것
+function all(){return DATA.map(c=>({...c,h:S.h[c.id]??c.h,edited:S.h[c.id]!=null})).concat(S.mine)}
+const byId=id=>all().find(c=>c.id===id);
+
+function silhouette(col,px){
+  const w=px*0.42;
   return `<svg width="${w}" height="${px}" viewBox="0 0 42 100" preserveAspectRatio="none">
    <ellipse cx="21" cy="17" rx="15" ry="16" fill="${col}"/>
    <path d="M8 36 Q21 30 34 36 L38 74 L4 74 Z" fill="${col}" opacity=".85"/>
@@ -96,75 +102,110 @@ function silhouette(c,px){
 }
 
 function renderList(){
-  $("list").innerHTML=S.chars.map((c,i)=>`<div class="row">
-   <input type="checkbox" data-i="${i}" class="on" ${c.on?"checked":""}>
-   <span class="nm">${esc(c.name)} <span class="tag">${c.race?esc(c.race)+"·":""}${esc(c.personality||"")}${c.fan?" · 팬 추정":""}</span></span>
-   <input class="h" type="number" step="0.1" data-i="${i}" value="${c.height}">cm
-   <button data-i="${i}" class="del" title="지우기">✕</button></div>`).join("");
+  const q=$("q").value.trim(),g=$("grp").value;
+  let arr=all();
+  if(g==="on")arr=arr.filter(c=>S.on.includes(c.id));
+  else if(g==="mine")arr=arr.filter(c=>c.mine);
+  else if(g)arr=arr.filter(c=>c.g===g);
+  if(q)arr=arr.filter(c=>c.name.includes(q));
+  $("cnt").textContent=`${S.on.length}명 세움 / ${all().length}명`;
+  $("list").innerHTML=arr.map(c=>`<div class="row">
+   <input type="checkbox" data-id="${esc(c.id)}" class="on" ${S.on.includes(c.id)?"checked":""}>
+   <span class="nm">${esc(c.name)} <span class="tag">${esc(c.g||"")}${FAN[c.name]&&c.g==="사도"?` · 팬 계산 ${FAN[c.name]}`:""}${c.edited?" · 고침":""}</span></span>
+   <input class="h" type="number" step="0.1" data-id="${esc(c.id)}" value="${c.h}">cm
+   ${c.mine?`<button data-id="${esc(c.id)}" class="del" title="지우기">✕</button>`:""}</div>`).join("")||`<p class="note">찾는 캐릭터가 없어요.</p>`;
 }
-function esc(s){return String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}
 
 function people(){
-  const arr=S.chars.map((c,i)=>({...c,i})).filter(c=>c.on);
+  const arr=S.on.map(byId).filter(Boolean);
   const me=parseFloat(S.me);
-  if(me>0)arr.push({name:"나",height:me,me:true,i:-1});
+  if(me>0)arr.push({id:"__me",name:"나",h:me,me:true});
   return arr;
 }
 function renderBoard(){
-  const arr=people(), board=$("board"), H=board.clientHeight-40;
-  const max=Math.max(120,...arr.map(c=>c.height))*1.08;
+  const arr=people(),board=$("board"),H=board.clientHeight-44;
+  const max=Math.max(120,...arr.map(c=>c.h))*1.08;
   const pxPerCm=H/max;
   const step=max>250?50:max>120?20:10;
   let g="";
   for(let cm=0;cm<=max;cm+=step)g+=`<div class="gl" style="bottom:${cm*pxPerCm}px">${cm}</div>`;
   $("grid").innerHTML=g;
   $("people").innerHTML=arr.map(c=>{
-    const px=c.height*pxPerCm;
-    const fig=c.me?`<svg width="${px*0.3}" height="${px}" viewBox="0 0 30 100" preserveAspectRatio="none"><circle cx="15" cy="7" r="7" fill="#555"/><rect x="7" y="15" width="16" height="45" rx="5" fill="#777"/><rect x="8" y="58" width="6" height="42" fill="#555"/><rect x="16" y="58" width="6" height="42" fill="#555"/></svg>`
-      :(imgs[c.name]||ART[c.name])?`<img src="${imgs[c.name]||ART[c.name]}" alt="${esc(c.name)}" style="height:${px}px">`:silhouette(c,px);
-    return `<div class="p" draggable="${!c.me}" data-i="${c.i}"><div class="lab">${esc(c.name)}<br><small>${c.height}cm</small></div><div class="fig" style="height:${px}px">${fig}</div></div>`;
+    const px=c.h*pxPerCm;
+    let fig;
+    if(c.me)fig=`<svg width="${px*0.3}" height="${px}" viewBox="0 0 30 100" preserveAspectRatio="none"><circle cx="15" cy="7" r="7" fill="#555"/><rect x="7" y="15" width="16" height="45" rx="5" fill="#777"/><rect x="8" y="58" width="6" height="42" fill="#555"/><rect x="16" y="58" width="6" height="42" fill="#555"/></svg>`;
+    else if(imgs[c.id])fig=`<img src="${imgs[c.id]}" alt="${esc(c.name)}" style="height:${px}px">`;
+    else if(c.img){
+      // 그림을 키에 맞춰 늘이고 줄임: 원래 추정 키 대비 바뀐 비율만큼
+      const base=DATA.find(d=>d.id===c.id), sc=c.h/base.h;
+      const ppx=base.u*sc*pxPerCm; // 그림 1px → 화면 px
+      fig=`<img src="${c.img}" alt="${esc(c.name)}" loading="lazy" style="height:${c.ih*ppx}px;margin-bottom:${-c.fb*ppx}px;max-width:none">`;
+    }
+    else fig=silhouette(COLORS[c.g]||"#c9a46b",px);
+    return `<div class="p" draggable="${!c.me}" data-id="${esc(c.id)}"><div class="lab">${esc(c.name)}<br><small>${c.h}cm</small></div><div class="fig" style="height:${px}px">${fig}</div></div>`;
   }).join("");
-  const sorted=[...arr].sort((a,b)=>b.height-a.height);
-  $("diff").textContent=sorted.length>1?`제일 큰 ${sorted[0].name}(${sorted[0].height}cm)와 제일 작은 ${sorted.at(-1).name}(${sorted.at(-1).height}cm)의 차이: ${(sorted[0].height-sorted.at(-1).height).toFixed(1)}cm`:"";
+  const sorted=[...arr].sort((a,b)=>b.h-a.h);
+  $("diff").textContent=sorted.length>1?`제일 큰 ${sorted[0].name}(${sorted[0].h}cm)와 제일 작은 ${sorted.at(-1).name}(${sorted.at(-1).h}cm)의 차이: ${(sorted[0].h-sorted.at(-1).h).toFixed(1)}cm`:"";
 }
 function render(){renderList();renderBoard();save()}
 
+$("q").addEventListener("input",renderList);
+$("grp").addEventListener("change",renderList);
 $("list").addEventListener("change",e=>{
-  const i=+e.target.dataset.i;
-  if(e.target.classList.contains("on"))S.chars[i].on=e.target.checked;
-  if(e.target.classList.contains("h")){const v=parseFloat(e.target.value);if(v>0){S.chars[i].height=v;S.chars[i].fan=0}}
+  const id=e.target.dataset.id;if(!id)return;
+  if(e.target.classList.contains("on")){
+    if(e.target.checked){if(!S.on.includes(id))S.on.push(id)}else S.on=S.on.filter(x=>x!==id);
+  }
+  if(e.target.classList.contains("h")){
+    const v=parseFloat(e.target.value);if(!(v>0))return;
+    const m=S.mine.find(c=>c.id===id);
+    if(m)m.h=v;else S.h[id]=v;
+  }
   render();
 });
 $("list").addEventListener("click",e=>{
   if(!e.target.classList.contains("del"))return;
-  S.chars.splice(+e.target.dataset.i,1);render();
+  const id=e.target.dataset.id;
+  S.mine=S.mine.filter(c=>c.id!==id);S.on=S.on.filter(x=>x!==id);render();
 });
+$("alloff").onclick=()=>{S.on=[];render()};
 $("add").addEventListener("submit",e=>{
   e.preventDefault();
   const name=$("nName").value.trim(),h=parseFloat($("nH").value);
   if(!name||!(h>0))return;
+  const id="mine:"+name;
   const f=$("nImg").files[0];
-  if(f)imgs[name]=URL.createObjectURL(f);
-  const ex=S.chars.find(c=>c.name===name);
-  if(ex){ex.height=h;ex.on=true;ex.fan=0}else S.chars.push({name,height:h,race:"",personality:"",on:true});
+  if(f)imgs[id]=URL.createObjectURL(f);
+  const ex=S.mine.find(c=>c.id===id);
+  if(ex)ex.h=h;else S.mine.push({id,name,h,g:"추가",mine:true});
+  if(!S.on.includes(id))S.on.push(id);
   e.target.reset();render();
 });
-$("me").value=S.me||"";
 $("me").addEventListener("input",e=>{S.me=e.target.value;renderBoard();save()});
-$("sortH").onclick=()=>{S.chars.sort((a,b)=>a.height-b.height);render()};
-$("reset").onclick=()=>{if(confirm("추가·수정한 내용을 지우고 처음 상태로 돌릴까요?")){S={chars:BASE.map(c=>({...c,on:true})),me:""};$("me").value="";render()}};
+$("sortH").onclick=()=>{S.on.sort((a,b)=>byId(a).h-byId(b).h);render()};
+$("reset").onclick=()=>{if(confirm("추가·수정한 내용을 지우고 처음 상태로 돌릴까요?")){S=fresh();$("me").value="";render()}};
 
-let dragI=null;
-$("people").addEventListener("dragstart",e=>{const p=e.target.closest(".p");dragI=+p.dataset.i;p.classList.add("drag")});
+let dragId=null;
+$("people").addEventListener("dragstart",e=>{const p=e.target.closest(".p");dragId=p.dataset.id;p.classList.add("drag")});
 $("people").addEventListener("dragover",e=>e.preventDefault());
 $("people").addEventListener("drop",e=>{
-  e.preventDefault();const p=e.target.closest(".p");if(!p||dragI===null)return;
-  const to=+p.dataset.i;if(to<0||to===dragI)return;
-  const [m]=S.chars.splice(dragI,1);S.chars.splice(to,0,m);dragI=null;render();
+  e.preventDefault();const p=e.target.closest(".p");if(!p||dragId===null)return;
+  const to=S.on.indexOf(p.dataset.id),from=S.on.indexOf(dragId);
+  if(to<0||from<0||to===from)return;
+  S.on.splice(from,1);S.on.splice(to,0,dragId);dragId=null;render();
 });
-$("people").addEventListener("dragend",()=>{dragI=null;renderBoard()});
+$("people").addEventListener("dragend",()=>{dragId=null;renderBoard()});
 addEventListener("resize",renderBoard);
-render();
+
+fetch("chars.json").then(r=>r.json()).then(d=>{
+  DATA=d;
+  try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  if(!S||!Array.isArray(S.on))S=fresh();
+  S.h=S.h||{};S.mine=S.mine||[];
+  S.on=S.on.filter(id=>byId(id));
+  $("me").value=S.me||"";
+  render();
+});
 </script>
 </body>
 </html>
