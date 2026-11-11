@@ -6,18 +6,29 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;font:15px/1.5 system-ui,"Malgun Gothic",sans-serif;background:#fff6e8;color:#3a2a1a}
-header{padding:14px 16px;background:#ffcf6b;border-bottom:3px solid #e0a43a}
-h1{margin:0;font-size:22px}
-header p{margin:4px 0 0;font-size:13px}
-main{display:flex;flex-wrap:wrap;gap:16px;padding:16px}
+#gear{position:fixed;top:10px;right:12px;z-index:5;width:40px;height:40px;border-radius:50%;border:2px solid #e0a43a;background:#ffcf6b;font-size:22px;line-height:1;cursor:pointer}
+#setBg{display:none;position:fixed;inset:0;z-index:10;background:#0006;align-items:center;justify-content:center}
+#setBg.open{display:flex}
+#setBox{background:#fff;border:3px solid #e0a43a;border-radius:14px;padding:14px 18px;width:min(460px,92vw);max-height:90vh;overflow:auto}
+#setBox h2{margin:0 0 10px;font-size:18px;display:flex;justify-content:space-between}
+#setBox h2 button{border:0;background:none;font-size:18px;cursor:pointer}
+#setBox h3{font-size:15px;margin:14px 0 4px}
+#setBox ul{margin:0;padding-left:18px;font-size:13px}
+.sw{display:block;margin:8px 0;font-weight:bold}
+.sw input{width:18px;height:18px;vertical-align:-3px}
+.sw .tag{display:block;font-weight:normal;margin-left:24px}
+.gray .fig{filter:grayscale(1)}
+main{display:flex;flex-wrap:wrap;gap:16px;padding:58px 16px 16px}
 #side{flex:0 0 320px;background:#fff;border:2px solid #f0d3a0;border-radius:12px;padding:12px}
 #side h2{font-size:16px;margin:4px 0 8px}
 #filt{display:flex;gap:6px;margin-bottom:6px}
-#filt input,#filt select{font:inherit;padding:5px;border:2px solid #f0d3a0;border-radius:8px;min-width:0}
+#filt input{font:inherit;padding:5px;border:2px solid #f0d3a0;border-radius:8px;min-width:0}
 #filt input{flex:1}
-#races{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
-#races button{font:inherit;font-size:13px;padding:3px 8px;border:2px solid var(--c,#f0d3a0);border-radius:14px;background:#fff;cursor:pointer}
-#races button.sel{background:var(--c,#ffcf6b);color:#fff;font-weight:bold}
+#races{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:6px}
+#races button{font:inherit;font-size:11px;line-height:1.2;padding:3px 0;border:2px solid transparent;border-radius:10px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px}
+#races button img,#races button .ic{width:38px;height:38px;border-radius:50%}
+#races button .ic{display:flex;align-items:center;justify-content:center;background:var(--c);color:#fff;font-weight:bold;font-size:13px}
+#races button.sel{border-color:var(--c,#e0a43a);background:#fff1d8;font-weight:bold}
 #raceAct{display:none;gap:6px;margin-bottom:6px;font-size:13px}
 #raceAct button{font:inherit;font-size:13px;padding:3px 8px;border:2px solid #f0d3a0;border-radius:8px;background:#fff;cursor:pointer}
 #list{max-height:520px;overflow-y:auto}
@@ -45,20 +56,31 @@ form label{grid-column:span 2;font-size:13px}
 .p .lab small{font-weight:normal;color:#a07040}
 .p .fig{position:relative;display:flex;align-items:flex-end;justify-content:center}
 .p img{height:100%;width:auto;display:block;object-fit:contain}
+.p canvas{display:block;pointer-events:none}
 .p.drag{opacity:.4}
 .note{font-size:12px;color:#8a6a40;margin-top:8px}
 </style>
 </head>
 <body>
-<header>
-<h1>🍮 트릭컬 캐릭터 키 비교</h1>
-<p>종족을 고르고 그 안에서 사도·NPC를 골라 나란히 세워 보세요. 그림은 게임 속 크기 그대로라서 서로 크기 비교가 돼요. 키 숫자는 고칠 수 있고, 새 캐릭터도 추가할 수 있어요.</p>
-<p style="font-size:11px;opacity:.7">캐릭터 그림: 트릭컬 리바이브(EPIDGames) 로비 캐릭터를 <a href="https://viewer.dclnslde.com/">트릭컬 스파인 뷰어</a>의 파일로 그려 뽑았어요. 팬 비교용이에요.</p>
-</header>
+<button id="gear" title="설정">⚙</button>
+<div id="setBg"><div id="setBox">
+  <h2>설정 <button id="setX" title="닫기">✕</button></h2>
+  <label class="sw"><input type="checkbox" id="optSpine"> 스파인 움직임 켜기 <span class="tag">세운 사도·NPC가 게임 로비처럼 움직여요</span></label>
+  <div id="spMsg" class="tag"></div>
+  <label class="sw"><input type="checkbox" id="optGray"> 흑백 처리 <span class="tag">세운 캐릭터를 흑백으로 보여 줘요</span></label>
+  <h3>크레딧</h3>
+  <ul>
+   <li>캐릭터 그림·움직임: 트릭컬 리바이브(EPIDGames) 로비 캐릭터. <a href="https://viewer.dclnslde.com/" target="_blank">트릭컬 스파인 뷰어</a>의 파일로 그려 뽑았어요.</li>
+   <li>종족 아이콘·종족 분류: 나무위키 「트릭컬 리바이브/캐릭터」 문서와 각 NPC 문서</li>
+   <li>키 기준값: 팬 계산(에르핀 95·버터 96·네르 98·마요 101cm, 아카라이브·나무위키)</li>
+   <li>움직임 재생: Spine Runtimes(Esoteric Software)</li>
+  </ul>
+  <p class="tag">팬이 만든 비교용 페이지예요. 게임 그림의 권리는 EPIDGames에 있어요.</p>
+</div></div>
 <main>
 <section id="side">
   <h2>캐릭터 목록 <span class="tag" id="cnt"></span></h2>
-  <div id="filt"><input id="q" placeholder="이름 검색"><select id="grp"><option value="">전체</option><option>사도</option><option>NPC</option><option value="on">세운 것만</option><option value="mine">내가 추가한 것</option></select></div>
+  <div id="filt"><input id="q" placeholder="이름 검색"></div>
   <div id="races"></div>
   <div id="raceAct"><button id="raceOn">이 종족 모두 세우기</button><button id="raceOff">이 종족 내리기</button></div>
   <div id="list"></div>
@@ -70,7 +92,7 @@ form label{grid-column:span 2;font-size:13px}
     <label>그림(선택): <input id="nImg" type="file" accept="image/*"></label>
     <button>+ 추가</button>
   </form>
-  <p class="note">키는 전부 <b>추정</b>이에요. 트릭컬은 공식 키를 공개하지 않아서, 게임 속 캐릭터 크기(발끝~머리·모자·귀 꼭대기)를 재고, 팬들이 계산한 4명(에르핀 95·버터 96·네르 98·마요 101cm, 아카라이브·나무위키)에 맞춰 cm로 바꿨어요. 무기·뿔·머리장식이 위로 솟은 캐릭터는 실제보다 크게 나와요. 겨우살이는 뷰어 원본 그림이 작게 나와서 1.2배로 키웠어요(100→120cm). 틀리면 숫자를 직접 고치세요(그림 크기도 따라 바뀌어요). 바꾼 내용은 이 브라우저에 저장돼요.</p>
+  <p class="note">키는 전부 <b>추정</b>이에요. 트릭컬은 공식 키를 공개하지 않아서, 게임 속 캐릭터 크기(발끝~머리·모자·귀 꼭대기)를 재고, 팬들이 계산한 4명(에르핀 95·버터 96·네르 98·마요 101cm, 아카라이브·나무위키)에 맞춰 cm로 바꿨어요. 무기·뿔·머리장식이 위로 솟은 캐릭터는 실제보다 크게 나와요. 겨우살이는 뷰어 원본 그림이 작게 나와서 1.2배로 키웠어요(100→120cm). 마요(멋짐)은 모자가 없어 작게 재져서 마요와 같은 키로 맞췄어요(97.9→101.6cm). 틀리면 숫자를 직접 고치세요(그림 크기도 따라 바뀌어요). 바꾼 내용은 이 브라우저에 저장돼요.</p>
   <button id="reset" style="margin-top:6px">처음 상태로</button>
 </section>
 <section id="stage">
@@ -83,6 +105,7 @@ form label{grid-column:span 2;font-size:13px}
   <div id="diff" class="note"></div>
 </section>
 </main>
+<script src="spine-webgl.js"></script>
 <script>
 // 캐릭터 데이터: chars.json (게임 로비 스파인을 같은 배율로 그려 뽑은 그림 + 크기 측정값)
 // h: 추정 키(cm), img: 그림, ih: 그림 높이(px), u: 그림 1px이 몇 cm인지, fb: 그림 아래 끝이 발바닥보다 몇 px 아래인지
@@ -91,9 +114,11 @@ const FAN={"에르핀":95,"버터":96,"네르":98,"마요":101}; // 팬 계산 �
 const COLORS={"사도":"#ffb347","NPC":"#7ccf7a"};
 // 종족: 나무위키 「트릭컬 리바이브/캐릭터」 종족별 목록과 각 NPC 문서 기준
 const RACES=["요정","수인","엘프","정령","유령","용족","마녀","미스틱","인간","기타"];
-const RC={"요정":"#f28cb8","수인":"#e0a43a","엘프":"#5fae5a","정령":"#4aa8d8","유령":"#9a86c8","용족":"#d9604c","마녀":"#7a5fa8","미스틱":"#c9a020","인간":"#8a8a8a","기타":"#b0a090"};
+// 종족 색 = 게임 종족 아이콘 색
+const RC={"요정":"#e8a923","수인":"#e8684a","엘프":"#25b5d0","정령":"#5cbf3a","유령":"#d65aa0","용족":"#8a9a98","마녀":"#9a5ccc","미스틱":"#5a5ad8","인간":"#8a8a8a","기타":"#b0a090"};
+const RICON={"요정":"fairy","수인":"beast","엘프":"elf","정령":"spirit","유령":"ghost","용족":"dragon","마녀":"witch","미스틱":"mystic"}; // race/*.webp
 let race=""; // 고른 종족 ("" = 전체)
-const KEY="tc-height-v2";
+const KEY="tc-height-v2",SKEY="tc-height-set";
 const $=id=>document.getElementById(id);
 let DATA=[],S=null;
 const imgs={}; // 직접 올린 그림: key -> objectURL (세션 동안만)
@@ -122,11 +147,8 @@ function thumb(c){
   return src?`<img class="th" src="${src}" alt="" loading="lazy" ${st}>`:`<span class="th none" ${st}>🙂</span>`;
 }
 function renderList(){
-  const q=$("q").value.trim(),g=$("grp").value;
+  const q=$("q").value.trim();
   let arr=all();
-  if(g==="on")arr=arr.filter(c=>S.on.includes(c.id));
-  else if(g==="mine")arr=arr.filter(c=>c.mine);
-  else if(g)arr=arr.filter(c=>c.g===g);
   if(race)arr=arr.filter(c=>(c.r||"기타")===race);
   if(q)arr=arr.filter(c=>c.name.includes(q));
   $("cnt").textContent=`${S.on.length}명 세움 / ${all().length}명`;
@@ -161,24 +183,139 @@ function renderBoard(){
       // 그림을 키에 맞춰 늘이고 줄임: 원래 추정 키 대비 바뀐 비율만큼
       const base=DATA.find(d=>d.id===c.id), sc=c.h/base.h;
       const ppx=base.u*sc*pxPerCm; // 그림 1px → 화면 px
-      fig=`<img src="${c.img}" alt="${esc(c.name)}" loading="lazy" style="height:${c.ih*ppx}px;margin-bottom:${-c.fb*ppx}px;max-width:none">`;
+      fig=`<img src="${c.img}" alt="${esc(c.name)}" loading="lazy" data-ppx="${ppx}" style="height:${c.ih*ppx}px;margin-bottom:${-c.fb*ppx}px;max-width:none">`;
     }
     else fig=silhouette(COLORS[c.g]||"#c9a46b",px);
     return `<div class="p" draggable="${!c.me}" data-id="${esc(c.id)}"><div class="lab">${esc(c.name)}<br><small>${c.h}cm</small></div><div class="fig" style="height:${px}px">${fig}</div></div>`;
   }).join("");
   const sorted=[...arr].sort((a,b)=>b.h-a.h);
+  spSync();
   $("diff").textContent=sorted.length>1?`제일 큰 ${sorted[0].name}(${sorted[0].h}cm)와 제일 작은 ${sorted.at(-1).name}(${sorted.at(-1).h}cm)의 차이: ${(sorted[0].h-sorted.at(-1).h).toFixed(1)}cm`:"";
 }
 function renderRaces(){
   const a=all(),n=r=>a.filter(c=>(c.r||"기타")===r).length;
-  $("races").innerHTML=`<button data-r="" class="${race?"":"sel"}">전체 ${a.length}</button>`+
-    RACES.filter(n).map(r=>`<button data-r="${r}" style="--c:${RC[r]}" class="${race===r?"sel":""}">${r} ${n(r)}</button>`).join("");
+  // 종족 아이콘이 없는 인간은 그 종족 캐릭터 얼굴, 기타는 물음표
+  const icon=r=>{
+    if(RICON[r])return `<img src="race/${RICON[r]}.webp" alt="">`;
+    const c=a.find(c=>(c.r||"기타")===r&&c.img);
+    return r!=="기타"&&c?`<img src="${c.img.replace("img/","thumb/")}" alt="" style="background:${RC[r]}">`:`<span class="ic">?</span>`;
+  };
+  $("races").innerHTML=`<button data-r="" style="--c:#e0a43a" class="${race?"":"sel"}"><span class="ic">ALL</span>전체 ${a.length}</button>`+
+    RACES.filter(n).map(r=>`<button data-r="${r}" style="--c:${RC[r]}" class="${race===r?"sel":""}">${icon(r)}${r} ${n(r)}</button>`).join("");
   $("raceAct").style.display=race?"flex":"none";
 }
 function render(){renderRaces();renderList();renderBoard();save()}
 
+// ── 스파인 움직임: 정지 그림을 같은 크기·위치의 움직이는 캔버스로 바꿔 끼움 ──
+// spine/<이름>.skel.gz(서기 동작 하나만 남긴 스켈레톤) + .atlas + .webp(원본의 절반 크기)
+// WebGL 캔버스 하나에 차례로 그린 뒤 캐릭터마다 2D 캔버스로 옮겨 그림
+const PPU=0.5,PAD=8,SPMAX=40; // PPU: 정지 그림 1px = 스켈레톤 2단위, PAD: 정지 그림 여백(단위)
+const SET={spine:false,gray:false};
+const SP={data:{},inst:{},list:[],raf:0,last:0};
+function spInit(){
+  if(SP.ren)return;
+  SP.cv=document.createElement("canvas");SP.cv.width=SP.cv.height=512;
+  SP.ctx=new spine.ManagedWebGLRenderingContext(SP.cv,{alpha:true,premultipliedAlpha:false,preserveDrawingBuffer:true});
+  SP.ren=new spine.SceneRenderer(SP.cv,SP.ctx,true);
+}
+function spLoad(slug){
+  return SP.data[slug]??=new Promise((res,rej)=>{
+    const am=new spine.AssetManager(SP.ctx,"spine/");
+    am.loadTextureAtlas(slug+".atlas");
+    const skel=fetch("spine/"+slug+".skel.gz").then(r=>{if(!r.ok)throw new Error(r.status);
+      return new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer()});
+    const t=setInterval(()=>{
+      if(!am.isLoadingComplete())return;clearInterval(t);
+      if(am.hasErrors())return rej(new Error(JSON.stringify(am.getErrors())));
+      const at=am.require(slug+".atlas");
+      // 그림은 절반 크기로 줄였으니 메쉬 좌표 계산에는 원래 크기를 알려 줌
+      at.pages.forEach(p=>{p.texture.getImage=()=>({width:p.width,height:p.height})});
+      skel.then(b=>res(new spine.SkeletonBinary(new spine.AtlasAttachmentLoader(at)).readSkeletonData(new Uint8Array(b))),rej);
+    },40);
+  });
+}
+// 정지 그림을 뽑을 때와 같은 테두리 계산(캐릭터에서 멀리 떨어진 효과는 뺌)
+function spBounds(sk){
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  for(const s of sk.drawOrder){const a=s.attachment;if(!a||!s.bone.active||s.color.a<0.02)continue;
+    let n,v;
+    if(a instanceof spine.RegionAttachment){v=new Float32Array(8);a.computeWorldVertices(s,v,0,2);n=8}
+    else if(a instanceof spine.MeshAttachment){n=a.worldVerticesLength;v=new Float32Array(n);a.computeWorldVertices(s,0,n,v,0,2)}
+    else continue;
+    let a0=1e9,b0=1e9,a1=-1e9,b1=-1e9;
+    for(let i=0;i<n;i+=2){a0=Math.min(a0,v[i]);a1=Math.max(a1,v[i]);b0=Math.min(b0,v[i+1]);b1=Math.max(b1,v[i+1])}
+    const cx=(a0+a1)/2,cy=(b0+b1)/2;
+    if(Math.abs(cx)>1600||cy<-400||cy>2600||a1-a0>4000||b1-b0>4000)continue;
+    x0=Math.min(x0,a0);x1=Math.max(x1,a1);y0=Math.min(y0,b0);y1=Math.max(y1,b1)}
+  return {x0,y0,x1,y1};
+}
+function spInst(c){
+  return SP.inst[c.id]??=spLoad(c.sp).then(sd=>{
+    const sk=new spine.Skeleton(sd),nm=sd.skins.map(x=>x.name);
+    const skin=nm.includes("Normal")?"Normal":(nm.length>1?nm.find(x=>x!=="default"):null);
+    if(skin)sk.setSkinByName(skin);
+    sk.setToSetupPose();
+    const st=new spine.AnimationState(new spine.AnimationStateData(sd)),an=sd.animations[0];
+    st.setAnimation(0,an.name,true);st.update(0);st.apply(sk);sk.updateWorldTransform();
+    const b=spBounds(sk),m=(b.y1-b.y0)*0.12; // 움직일 자리를 위·옆으로 조금 더
+    st.update(Math.random()*an.duration); // 다 같이 똑같이 움직이지 않게
+    return {sk,st,m,X0:b.x0-PAD-m,X1:b.x1+PAD+m,Y0:b.y0-PAD,Y1:b.y1+PAD+m};
+  });
+}
+function spSync(){
+  SP.list=[];
+  $("spMsg").textContent="";
+  if(!SET.spine)return spStop();
+  try{spInit()}catch(e){$("spMsg").textContent="이 브라우저는 움직임(WebGL)을 못 켜요.";return}
+  const imgsOn=[...$("people").querySelectorAll(".p img[data-ppx]")];
+  if(imgsOn.length>SPMAX)$("spMsg").textContent=`세운 캐릭터가 많아서 앞쪽 ${SPMAX}명만 움직여요.`;
+  imgsOn.slice(0,SPMAX).forEach(img=>{
+    const c=DATA.find(d=>d.id===img.closest(".p").dataset.id),ppx=+img.dataset.ppx;
+    spInst(c).then(I=>{
+      if(!img.isConnected)return;
+      const s=ppx*PPU,W=(I.X1-I.X0)*s,H=(I.Y1-I.Y0)*s,dpr=Math.min(2,devicePixelRatio||1);
+      const cv=document.createElement("canvas");
+      cv.width=Math.min(1024,Math.ceil(W*dpr));cv.height=Math.min(1024,Math.ceil(H*dpr));
+      cv.style.cssText=`width:${W}px;height:${H}px;margin:0 ${-I.m*s}px ${I.Y0*s}px`;
+      img.replaceWith(cv);
+      const it={I,cv,g:cv.getContext("2d")};
+      SP.list.push(it);spDraw(it,0); // 바로 한 번 그려서 깜빡임 없게
+      spStart();
+    }).catch(e=>{console.warn(c.id,e);$("spMsg").textContent=`${c.name} 움직임 파일을 못 불러서 그림으로 보여요.`});
+  });
+}
+function spStart(){if(!SP.raf){SP.last=performance.now();SP.raf=requestAnimationFrame(spTick)}}
+function spStop(){cancelAnimationFrame(SP.raf);SP.raf=0}
+function spTick(now){
+  const dt=Math.min(0.1,(now-SP.last)/1000);SP.last=now;
+  for(const it of SP.list)if(it.cv.isConnected)spDraw(it,dt);
+  SP.raf=requestAnimationFrame(spTick);
+}
+function spDraw({I,cv,g},dt){
+    const gl=SP.ctx.gl,cam=SP.ren.camera;
+    I.st.update(dt);I.st.apply(I.sk);I.sk.updateWorldTransform();
+    const w=cv.width,h=cv.height;
+    if(SP.cv.width<w||SP.cv.height<h){SP.cv.width=Math.max(SP.cv.width,w);SP.cv.height=Math.max(SP.cv.height,h)}
+    gl.viewport(0,0,w,h);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+    cam.viewportWidth=I.X1-I.X0;cam.viewportHeight=I.Y1-I.Y0;
+    cam.position.x=(I.X0+I.X1)/2;cam.position.y=(I.Y0+I.Y1)/2;cam.zoom=1;cam.update();
+    SP.ren.begin();SP.ren.drawSkeleton(I.sk,false);SP.ren.end();
+    g.clearRect(0,0,w,h);g.drawImage(SP.cv,0,SP.cv.height-h,w,h,0,0,w,h);
+}
+function applySet(){
+  $("optSpine").checked=SET.spine;$("optGray").checked=SET.gray;
+  $("board").classList.toggle("gray",SET.gray);
+  try{localStorage.setItem(SKEY,JSON.stringify(SET))}catch(e){}
+}
+try{Object.assign(SET,JSON.parse(localStorage.getItem(SKEY))||{})}catch(e){}
+$("gear").onclick=()=>$("setBg").classList.add("open");
+$("setX").onclick=()=>$("setBg").classList.remove("open");
+$("setBg").addEventListener("click",e=>{if(e.target.id==="setBg")$("setBg").classList.remove("open")});
+$("optSpine").onchange=e=>{SET.spine=e.target.checked;applySet();renderBoard()};
+$("optGray").onchange=e=>{SET.gray=e.target.checked;applySet()};
+applySet();
+
 $("q").addEventListener("input",renderList);
-$("grp").addEventListener("change",renderList);
 $("list").addEventListener("change",e=>{
   const id=e.target.dataset.id;if(!id)return;
   if(e.target.classList.contains("on")){
