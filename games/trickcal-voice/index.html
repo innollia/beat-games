@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>트릭컬 사도 말투 바꾸기</title>
+<style>
+:root{--c:#e0a43a}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.55 system-ui,"Malgun Gothic",sans-serif;background:#fff6e8;color:#3a2a1a}
+button{font:inherit;cursor:pointer}
+#wrap{display:grid;grid-template-columns:330px 1fr;gap:14px;max-width:1180px;margin:0 auto;padding:14px}
+@media(max-width:800px){#wrap{grid-template-columns:1fr}#list{max-height:300px}}
+#side,#main section{background:#fffdf8;border:1px solid #ecd9b8;border-radius:14px;padding:12px}
+#side{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 28px);position:sticky;top:14px}
+#filt{width:100%;padding:7px 10px;border:1px solid #e3cba4;border-radius:9px;background:#fff;color:inherit}
+#races{display:flex;flex-wrap:wrap;gap:3px}
+#races button{border:2px solid transparent;background:#f6ead6;border-radius:9px;padding:2px;width:36px;height:36px;display:grid;place-items:center;font-size:12px;color:#7a5a2a}
+#races button.sel{border-color:var(--c);background:#ffeccb}
+#races img{width:28px;height:28px;object-fit:contain}
+#list{overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:6px;padding:2px}
+.ch{border:2px solid transparent;background:#f8eedd;border-radius:11px;padding:3px 2px 2px;text-align:center;font-size:11.5px;line-height:1.2;color:inherit}
+.ch img{width:52px;height:52px;object-fit:cover;border-radius:50%;background:#efdcbc;display:block;margin:0 auto 2px;border:2px solid var(--r,#e0a43a)}
+.ch.sel{border-color:#e0a43a;background:#ffe3ad}
+.ch.nod{opacity:.45}
+#main{display:flex;flex-direction:column;gap:12px}
+#card{display:flex;gap:12px;align-items:flex-start;padding-right:40px}
+#card img{width:84px;height:84px;border-radius:50%;object-fit:cover;background:#efdcbc;border:3px solid var(--r,#e0a43a);flex:none}
+#card h1{margin:0;font-size:22px}
+#card .sum{margin:2px 0 6px}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{background:#f6ead6;border-radius:7px;padding:1px 8px;font-size:13px;color:#7a5a2a}
+#ex{margin:8px 0 0;padding-left:18px;color:#6b5236;font-size:14px}
+#ex li{margin:1px 0}
+textarea{width:100%;min-height:130px;padding:10px;border:1px solid #e3cba4;border-radius:10px;font:inherit;background:#fff;color:inherit;resize:vertical}
+.bar{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.bar button{border:1px solid #e3cba4;background:#fff7ea;border-radius:9px;padding:6px 12px;color:inherit}
+.bar button.main{background:#e0a43a;border-color:#e0a43a;color:#fff;font-weight:700}
+#out{white-space:pre-wrap;min-height:90px;padding:12px;border-radius:10px;background:#fff3dc;border:1px dashed #e3cba4;font-size:16px}
+#out:empty::before{content:"여기에 바뀐 글이 나와요";color:#b89a70}
+#msg{font-size:13px;color:#a0662a;min-height:1.3em}
+h2{margin:0 0 6px;font-size:16px}
+#gear{position:fixed;right:14px;top:10px;z-index:5;width:40px;height:40px;border-radius:50%;border:2px solid #e0a43a;background:#fff3dc;font-size:20px}
+#setBg{position:fixed;inset:0;background:#0006;display:none;z-index:9;align-items:center;justify-content:center}
+#setBg.on{display:flex}
+#setBox{background:#fffdf8;border:1px solid #ecd9b8;border-radius:14px;padding:16px;width:min(520px,94vw);max-height:90vh;overflow:auto}
+#setBox h2{display:flex;justify-content:space-between}
+#setBox h2 button{border:0;background:none;font-size:20px;color:inherit}
+#setBox label{display:block;margin:8px 0}
+#setBox input[type=text],#setBox input[type=password],#setBox select{width:100%;padding:6px 8px;border:1px solid #e3cba4;border-radius:8px;background:#fff;color:inherit}
+.note{font-size:13px;color:#8a6a40}
+body.dark{background:#1b1712;color:#eadfcd;color-scheme:dark}
+body.dark a{color:#ffc56b}
+body.dark #side,body.dark #main section,body.dark #setBox{background:#262019;border-color:#4a3d2a}
+body.dark #filt,body.dark textarea,body.dark #setBox input,body.dark #setBox select{background:#1f1a14;border-color:#4a3d2a;color:#eadfcd}
+body.dark .ch,body.dark #races button,body.dark .tag{background:#2e271e;color:#eadfcd}
+body.dark .ch.sel,body.dark #races button.sel{background:#3d3220}
+body.dark .bar button{background:#2e271e;border-color:#4a3d2a;color:#eadfcd}
+body.dark .bar button.main{background:#a8782a;border-color:#a8782a;color:#fff}
+body.dark #out{background:#2a2219;border-color:#4a3d2a}
+body.dark #ex,body.dark .note{color:#c9a274}
+body.dark #gear{background:#3a2f1f;border-color:#a8782a}
+</style>
+</head>
+<body>
+<button id="gear" title="설정">⚙</button>
+<div id="wrap">
+  <aside id="side">
+    <input id="filt" placeholder="사도 이름 찾기">
+    <div id="races"></div>
+    <div id="list"></div>
+  </aside>
+  <div id="main">
+    <section>
+      <div id="card"></div>
+      <ul id="ex"></ul>
+    </section>
+    <section>
+      <h2>바꿀 글</h2>
+      <textarea id="inp" placeholder="여기에 글을 넣으세요. 예) 안녕하세요. 오늘은 날씨가 정말 좋네요. 같이 산책하러 가실래요?"></textarea>
+      <div class="bar">
+        <button class="main" id="go">말투로 바꾸기</button>
+        <button id="again">다른 버전</button>
+        <button id="ai">✨ AI로 더 자연스럽게</button>
+        <button id="prompt">AI용 프롬프트 복사</button>
+      </div>
+    </section>
+    <section>
+      <h2 id="outT">바뀐 글</h2>
+      <div id="out"></div>
+      <div class="bar"><button id="copy">복사</button><span id="msg"></span></div>
+    </section>
+  </div>
+</div>
+<div id="setBg"><div id="setBox">
+  <h2>설정 <button id="setX">✕</button></h2>
+  <label><input type="checkbox" id="sDark"> 어두운 화면</label>
+  <h2 style="margin-top:14px">AI로 바꾸기</h2>
+  <p class="note">"말투로 바꾸기"는 규칙으로 바로 바꿔서 어색할 때가 있어요. 내 AI 키를 넣으면 "✨ AI로 더 자연스럽게" 버튼이 사도 대사를 보여 주고 그 말투로 다시 써 줘요. 키는 이 브라우저에만 저장되고, 글을 바꿀 때 그 AI 회사로만 보내져요. 키가 없으면 "AI용 프롬프트 복사"를 눌러 ChatGPT·Gemini·Claude 채팅창에 붙여 넣으면 돼요.</p>
+  <label>AI 종류
+    <select id="sProv"><option value="gemini">Google Gemini (무료 키 가능)</option><option value="claude">Anthropic Claude</option><option value="openai">OpenAI ChatGPT</option></select></label>
+  <label>모델 이름 <input type="text" id="sModel" placeholder="비워 두면 기본값"></label>
+  <label>API 키 <input type="password" id="sKey" placeholder="여기에 키 붙여 넣기" autocomplete="off"></label>
+  <p class="note">Gemini 무료 키: aistudio.google.com 에서 "Get API key"로 만들 수 있어요.</p>
+  <h2 style="margin-top:14px">알아 두기</h2>
+  <p class="note">팬이 만든 비공식 사이트예요. 사도 말투는 게임 대사(위키 대사 모음)와 유튜브 「애랑수」 채널 영상 속 사도 목소리(자동 자막과 음성 인식으로 받아 적은 것, 🎙 표시)를 보고 정리한 <b>추정</b>이에요. 규칙으로 바꾸는 방식이라 문장이 어색할 수 있어요.</p>
+  <p class="note" id="credit"></p>
+</div></div>
+<script src="convert.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const RACES=["요정","수인","엘프","정령","유령","용족","마녀","미스틱"];
+const RC={"요정":"#e8a923","수인":"#e8684a","엘프":"#25b5d0","정령":"#5cbf3a","유령":"#d65aa0","용족":"#8a9a98","마녀":"#9a5ccc","미스틱":"#5a5ad8"};
+const RICON={"요정":"fairy","수인":"beast","엘프":"elf","정령":"spirit","유령":"ghost","용족":"dragon","마녀":"witch","미스틱":"mystic"};
+const SKEY="tc-voice-set";
+const S=Object.assign({dark:false,prov:"gemini",model:"",key:"",sp:"erpin",race:""},JSON.parse(localStorage.getItem(SKEY)||"{}"));
+const save=()=>localStorage.setItem(SKEY,JSON.stringify(S));
+let DATA=[],cur=null,seed=1;
+const thumb=c=>`../trickcal-height/thumb/${c.sp}.webp`;
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+
+function drawRaces(){
+  $("races").innerHTML=`<button data-r="" class="${S.race?"":"sel"}">전체</button>`+RACES.map(r=>`<button data-r="${r}" title="${r}" class="${S.race===r?"sel":""}" style="--c:${RC[r]}"><img src="../trickcal-height/race/${RICON[r]}.webp" alt="${r}"></button>`).join("");
+}
+function drawList(){
+  const q=$("filt").value.trim();
+  $("list").innerHTML=DATA.filter(c=>(!S.race||c.race===S.race)&&(!q||c.name.includes(q))).map(c=>
+    `<button class="ch${c.sp===S.sp?" sel":""}${c.examples&&c.examples.length?"":" nod"}" data-sp="${c.sp}" style="--r:${RC[c.race]||"#e0a43a"}"><img loading="lazy" src="${thumb(c)}" alt="">${esc(c.name)}</button>`).join("");
+}
+function drawCard(){
+  const c=cur; if(!c) return;
+  const tags=[];
+  if(c.me) tags.push("나 → "+c.me);
+  if(c.you) tags.push("교주 부르기: "+c.you);
+  (c.habits||[]).slice(0,4).forEach(h=>tags.push(h));
+  $("card").innerHTML=`<img src="${thumb(c)}" style="--r:${RC[c.race]||"#e0a43a"}"><div><h1>${esc(c.name)}</h1><p class="sum">${esc(c.summary||"말투 자료를 아직 못 모았어요.")}</p><div class="tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div></div>`;
+  $("ex").innerHTML=(c.examples||[]).slice(0,4).map(l=>`<li>${esc(l)}</li>`).join("")+(c.voice||[]).slice(0,2).map(l=>`<li title="애랑수 영상 목소리를 받아 적은 대사">🎙 ${esc(l)}</li>`).join("");
+  $("outT").textContent=c.name+" 말투로";
+}
+function pickChar(sp){
+  cur=DATA.find(c=>c.sp===sp)||DATA[0]; S.sp=cur.sp; save(); seed=1;
+  drawList(); drawCard(); if($("inp").value.trim()) run();
+}
+function run(){
+  if(!cur) return;
+  $("out").textContent=TV.convert($("inp").value,cur,seed);
+  $("msg").textContent="";
+}
+function buildPrompt(text){
+  const c=cur;
+  const lines=[`너는 게임 「트릭컬 리바이브」의 사도 "${c.name}"의 말투 전문가야.`,
+  `아래 [글]의 뜻과 내용은 그대로 두고, 말투만 ${c.name}가 직접 말하는 것처럼 바꿔 줘.`,
+  `- 말투 특징: ${c.summary||""}`];
+  if(c.me) lines.push(`- 자기를 부르는 말: ${c.me}`);
+  if(c.you) lines.push(`- 플레이어(교주)를 부르는 말: ${c.you}`);
+  if(c.habits&&c.habits.length) lines.push(`- 말버릇: ${c.habits.join(", ")}`);
+  if(c.notes) lines.push(`- 참고: ${c.notes}`);
+  if(c.examples&&c.examples.length){lines.push(`- ${c.name}의 실제 대사 예시:`);c.examples.forEach(l=>lines.push(`  · ${l}`));}
+  if(c.voice&&c.voice.length){lines.push(`- 영상 속 ${c.name} 목소리를 받아 적은 대사:`);c.voice.forEach(l=>lines.push(`  · ${l}`));}
+  lines.push(`내용을 더하거나 빼지 말고, 문장 수도 비슷하게. 바꾼 글만 출력해.`,``,`[글]`,text);
+  return lines.join("\n");
+}
+async function callAI(prompt){
+  const k=S.key.trim();
+  if(S.prov==="gemini"){
+    const m=S.model||"gemini-2.5-flash";
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":k},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+    const j=await r.json(); if(!r.ok) throw new Error(j.error?.message||r.status);
+    return (j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("");
+  }
+  if(S.prov==="claude"){
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":k,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:S.model||"claude-haiku-5-5",max_tokens:2000,messages:[{role:"user",content:prompt}]})});
+    const j=await r.json(); if(!r.ok) throw new Error(j.error?.message||r.status);
+    return j.content.map(p=>p.text||"").join("");
+  }
+  const r=await fetch("https://api.openai.com/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+k},body:JSON.stringify({model:S.model||"gpt-4o-mini",messages:[{role:"user",content:prompt}]})});
+  const j=await r.json(); if(!r.ok) throw new Error(j.error?.message||r.status);
+  return j.choices[0].message.content;
+}
+async function copy(t,ok){try{await navigator.clipboard.writeText(t);$("msg").textContent=ok}catch{$("msg").textContent="복사가 막혔어요. 직접 드래그해서 복사해 주세요."}}
+
+$("races").onclick=e=>{const b=e.target.closest("button");if(!b)return;S.race=b.dataset.r;save();drawRaces();drawList()};
+$("list").onclick=e=>{const b=e.target.closest(".ch");if(b)pickChar(b.dataset.sp)};
+$("filt").oninput=drawList;
+$("go").onclick=()=>{seed=1;run()};
+$("again").onclick=()=>{seed++;run()};
+$("inp").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){seed=1;run()}});
+$("copy").onclick=()=>copy($("out").textContent,"복사했어요!");
+$("prompt").onclick=()=>{if(!$("inp").value.trim()){$("msg").textContent="먼저 바꿀 글을 넣어 주세요.";return}copy(buildPrompt($("inp").value),"프롬프트를 복사했어요. ChatGPT·Gemini 채팅창에 붙여 넣으세요.")};
+$("ai").onclick=async()=>{
+  if(!$("inp").value.trim()){$("msg").textContent="먼저 바꿀 글을 넣어 주세요.";return}
+  if(!S.key.trim()){openSet();$("msg").textContent="⚙ 설정에 AI 키를 넣어 주세요.";return}
+  $("msg").textContent="AI가 바꾸는 중…";$("ai").disabled=true;
+  try{$("out").textContent=(await callAI(buildPrompt($("inp").value))).trim();$("msg").textContent="AI가 바꿨어요."}
+  catch(err){$("msg").textContent="AI 오류: "+err.message}
+  finally{$("ai").disabled=false}
+};
+function openSet(){$("setBg").classList.add("on")}
+$("gear").onclick=openSet;
+$("setX").onclick=()=>$("setBg").classList.remove("on");
+$("setBg").onclick=e=>{if(e.target.id==="setBg")$("setBg").classList.remove("on")};
+const applyDark=()=>document.body.classList.toggle("dark",S.dark);
+$("sDark").checked=S.dark;$("sDark").onchange=()=>{S.dark=$("sDark").checked;save();applyDark()};
+$("sProv").value=S.prov;$("sProv").onchange=()=>{S.prov=$("sProv").value;save()};
+$("sModel").value=S.model;$("sModel").oninput=()=>{S.model=$("sModel").value.trim();save()};
+$("sKey").value=S.key;$("sKey").oninput=()=>{S.key=$("sKey").value;save()};
+applyDark();
+
+fetch("styles.json").then(r=>r.json()).then(d=>{
+  DATA=d.chars; $("credit").innerHTML=d.credit||"";
+  drawRaces(); pickChar(S.sp);
+  if(!$("inp").value) $("inp").value="안녕하세요. 오늘은 날씨가 정말 좋네요.\n저는 지금 산책을 하고 있어요. 같이 가실래요?";
+  run();
+});
+</script>
+</body>
+</html>
