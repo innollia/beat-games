@@ -59,6 +59,24 @@ form label{grid-column:span 2;font-size:13px}
 .p canvas{display:block;pointer-events:none}
 .p.drag{opacity:.4}
 .note{font-size:12px;color:#8a6a40;margin-top:8px}
+/* 어두운 화면 */
+body.dark{background:#1b1712;color:#eadfcd;color-scheme:dark}
+body.dark a{color:#ffc56b}
+body.dark #gear{background:#3a2f1f;border-color:#a8782a}
+body.dark #setBox,body.dark #side,body.dark #stage{background:#262019;border-color:#4a3d2a}
+body.dark #setBox h2 button{color:#eadfcd}
+body.dark #races button,body.dark #raceAct button,body.dark #controls button{background:#2e271e;color:#eadfcd;border-color:#4a3d2a}
+body.dark #races button{border-color:transparent}
+body.dark #races button.sel{background:#3d3220;border-color:var(--c,#e0a43a)}
+body.dark #filt input,body.dark form input,body.dark form select,body.dark .row input{background:#1f1a14;color:#eadfcd;border-color:#4a3d2a}
+body.dark form button{background:#a8782a;color:#fff;border-color:#a8782a}
+body.dark .row{border-bottom-color:#3d3324}
+body.dark .row .th{background:#3a2f1f}
+body.dark .row button{color:#eadfcd}
+body.dark .tag,body.dark .p .lab small{color:#c9a274}
+body.dark .note{color:#b8986c}
+body.dark #board{border-bottom-color:#b8925a}
+body.dark .gl{border-top-color:#3d3324;color:#8f7656}
 </style>
 </head>
 <body>
@@ -67,6 +85,7 @@ form label{grid-column:span 2;font-size:13px}
   <h2>설정 <button id="setX" title="닫기">✕</button></h2>
   <label class="sw"><input type="checkbox" id="optSpine"> 스파인 움직임 켜기 <span class="tag">세운 사도·NPC가 게임 로비처럼 움직여요</span></label>
   <div id="spMsg" class="tag"></div>
+  <label class="sw"><input type="checkbox" id="optDark"> 어두운 화면 <span class="tag">배경과 목록을 어두운 색으로 바꿔요</span></label>
   <label class="sw"><input type="checkbox" id="optGray"> 흑백 처리 <span class="tag">세운 캐릭터를 흑백으로 보여 줘요</span></label>
   <h3>크레딧</h3>
   <ul>
@@ -211,7 +230,7 @@ function render(){renderRaces();renderList();renderBoard();save()}
 // spine/<이름>.skel.gz(서기 동작 하나만 남긴 스켈레톤) + .atlas + .webp(원본의 절반 크기)
 // WebGL 캔버스 하나에 차례로 그린 뒤 캐릭터마다 2D 캔버스로 옮겨 그림
 const PPU=0.5,PAD=8,SPMAX=40; // PPU: 정지 그림 1px = 스켈레톤 2단위, PAD: 정지 그림 여백(단위)
-const SET={spine:false,gray:false};
+const SET={spine:false,gray:false,dark:false};
 const SP={data:{},inst:{},list:[],raf:0,last:0};
 function spInit(){
   if(SP.ren)return;
@@ -304,8 +323,9 @@ function spDraw({I,cv,g},dt){
     g.clearRect(0,0,w,h);g.drawImage(SP.cv,0,SP.cv.height-h,w,h,0,0,w,h);
 }
 function applySet(){
-  $("optSpine").checked=SET.spine;$("optGray").checked=SET.gray;
+  $("optSpine").checked=SET.spine;$("optGray").checked=SET.gray;$("optDark").checked=SET.dark;
   $("board").classList.toggle("gray",SET.gray);
+  document.body.classList.toggle("dark",SET.dark);
   try{localStorage.setItem(SKEY,JSON.stringify(SET))}catch(e){}
 }
 try{Object.assign(SET,JSON.parse(localStorage.getItem(SKEY))||{})}catch(e){}
@@ -314,6 +334,7 @@ $("setX").onclick=()=>$("setBg").classList.remove("open");
 $("setBg").addEventListener("click",e=>{if(e.target.id==="setBg")$("setBg").classList.remove("open")});
 $("optSpine").onchange=e=>{SET.spine=e.target.checked;applySet();renderBoard()};
 $("optGray").onchange=e=>{SET.gray=e.target.checked;applySet()};
+$("optDark").onchange=e=>{SET.dark=e.target.checked;applySet()};
 applySet();
 
 $("q").addEventListener("input",renderList);
